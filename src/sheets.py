@@ -21,12 +21,16 @@ RESULTS_HEADERS = [
 ]
 
 _PROFILE_PLACEHOLDER = [
-    ['Background',       'Replace with 2-3 sentences: your level, background, and what you do'],
-    ['Anchors',          'Replace with anchors separated by | e.g. Built GTM motion from 0→1 | Launched product into new market'],
-    ['Keywords',         'Replace with keywords separated by commas e.g. GTM, revenue operations, go-to-market'],
-    ['Negative Signals', 'Replace with signals separated by | e.g. Pure sales quota role | Individual contributor only'],
-    ['Comp Target',      'Replace with e.g. $300K-$400K OTE'],
-    ['Score Threshold',  '6'],
+    ['Background',         'Replace with 2-3 sentences: your level, background, and what you do'],
+    ['Anchors',            'Replace with anchors separated by | e.g. Built GTM motion from 0→1 | Launched product into new market'],
+    ['Keywords',           'Replace with keywords separated by commas e.g. GTM, revenue operations, go-to-market'],
+    ['Negative Signals',   'Replace with signals separated by | e.g. Pure sales quota role | Individual contributor only'],
+    ['Comp Target',        ''],
+    ['Score Threshold',    '6'],
+    ['Location',           'US only'],
+    ['Seniority Keywords', 'head of, vp, vice president, director, chief, principal, managing director, general manager'],
+    ['Target Functions',   'gtm, go-to-market, sales, revenue, commercial, product ops, product operations, product strategy, business ops, business operations, strategy, transformation, enablement, customer success, partnerships, alliances, ai strategy, enterprise, growth, chief of staff, value engineering'],
+    ['Exclude Functions',  'engineer, legal, counsel, compliance, finance, accounting, recruiter, recruiting, cybersecurity, data science, machine learning'],
 ]
 
 _COMPANIES_PLACEHOLDER = [

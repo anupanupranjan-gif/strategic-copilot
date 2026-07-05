@@ -174,6 +174,17 @@ Then delete `setup/resume.txt` and `setup/sample_jobs.txt` from your repo — na
 
 **Score threshold:** defaults to 6. A score of 6 means "interesting but not obvious." Raise it to 7 if you're getting too much noise; lower it to 5 if you're missing roles you'd want to see.
 
+**Filter settings** — the bottom four rows of the profile tab control which job titles get passed to the AI scorer. The Build Scoring Profile workflow sets these automatically, but you can adjust them:
+
+| Field | What it does | Example |
+|---|---|---|
+| `Location` | Geography filter | `US only`, `Remote only`, or `Any` |
+| `Seniority Keywords` | Title must contain one of these | `director, vp, head of, principal` |
+| `Target Functions` | Title must also contain one of these | `gtm, sales, strategy, operations` |
+| `Exclude Functions` | Title must NOT contain any of these | `engineer, legal, finance, recruiter` |
+
+Use commas to separate values. Jobs that don't match your seniority + function criteria are skipped before scoring, keeping API costs low.
+
 **Updating your profile later:** if your search evolves, repeat Steps 5.1–5.4 with updated materials at any time. Changes take effect on the next daily scan.
 
 ---
@@ -308,6 +319,8 @@ Test the API URL directly in your browser. For Ashby: `https://api.ashbyhq.com/p
 - Greenhouse: `https://boards-api.greenhouse.io/v1/boards/HANDLE/jobs`
 - Lever: `https://api.lever.co/v0/postings/HANDLE?mode=json`
 - Gem: `https://api.gem.com/job_board/v0/HANDLE/job_posts/`
+
+**Workday handles** use a different format: `subdomain.wdN/board` — for example `crowdstrike.wd5/crowdstrikecareers`. Find it by going to the company's careers page and looking at the URL: `https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers` → handle is `crowdstrike.wd5/crowdstrikecareers`.
 
 ---
 

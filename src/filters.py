@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
-NON_US = [
+# Known non-US location keywords — used when Location = "US only"
+_NON_US = [
     'united kingdom', 'london', 'england', 'scotland', 'ireland', 'edinburgh', 'manchester',
     'germany', 'berlin', 'munich', 'frankfurt', 'hamburg',
     'france', 'paris', 'lyon',
@@ -16,12 +17,20 @@ NON_US = [
     'emea', 'apac', 'latam', 'europe', 'asia pacific', 'asia-pacific', ', uk', '- uk',
 ]
 
-SENIORITY = [
+# Fallback defaults used when profile fields are blank
+_DEFAULT_SENIORITY = [
     'head of', 'vp ', 'vp,', 'vice president', 'director', 'chief',
     'principal', 'managing director', 'general manager',
 ]
-
-SKIP_FUNCTIONS = [
+_DEFAULT_TARGET = [
+    'gtm', 'go-to-market', 'go to market', 'sales', 'revenue', 'commercial',
+    'product ops', 'product operations', 'product strategy', 'business ops',
+    'business operations', 'operations', ' ops', 'strategy', 'strategic',
+    'transformation', 'enablement', 'customer success', 'customer experience',
+    'partnerships', 'alliances', 'biz dev', 'ai strategy', 'ai lead', 'enterprise',
+    'growth', 'chief of staff', 'value', 'market', 'field ',
+]
+_DEFAULT_EXCLUDE = [
     'engineer', 'devops', 'backend', 'frontend', 'fullstack', 'full-stack', 'qa ', 'sre ',
     'design', 'scientist', 'researcher', ' research', ' legal', 'counsel', 'attorney',
     'compliance', 'governance', 'regulatory', 'finance', 'financial', 'treasury',
@@ -32,14 +41,22 @@ SKIP_FUNCTIONS = [
     'facilities', 'real estate', 'data science', 'machine learning', 'clinical', 'medical',
 ]
 
-TARGET_FUNCTIONS = [
-    'gtm', 'go-to-market', 'go to market', 'sales', 'revenue', 'commercial',
-    'product ops', 'product operations', 'product strategy', 'business ops',
-    'business operations', 'business development', 'operations', ' ops', 'strategy',
-    'strategic', 'transformation', 'enablement', 'customer success', 'customer experience',
-    'partnerships', 'alliances', 'biz dev', 'ai strategy', 'ai lead', 'enterprise',
-    'growth', 'chief of staff', 'value', 'market', 'field ',
-]
+
+def _parse_list(value: str) -> list:
+    """Parse a comma-separated or pipe-separated string into a list of lowercase strings."""
+    if not value or not value.strip():
+        return []
+    sep = '|' if '|' in value else ','
+    return [item.strip().lower() for item in value.split(sep) if item.strip()]
+
+
+def _build_filter_lists(profile: dict) -> tuple:
+    """Return (location_mode, seniority, target, exclude) from profile, with defaults."""
+    location = (profile.get('location') or '').strip().lower() or 'us only'
+    seniority = _parse_list(profile.get('seniority_keywords', '')) or _DEFAULT_SENIORITY
+    target    = _parse_list(profile.get('target_functions', ''))   or _DEFAULT_TARGET
+    exclude   = _parse_list(profile.get('exclude_functions', ''))  or _DEFAULT_EXCLUDE
+    return location, seniority, target, exclude
 
 
 def is_too_old(job: dict, days: int = 30) -> bool:
@@ -52,27 +69,38 @@ def is_too_old(job: dict, days: int = 30) -> bool:
         return False
 
 
-def _is_non_us(loc: str) -> bool:
+def _location_ok(loc: str, mode: str) -> bool:
     if not loc:
-        return False
-    loc = loc.strip().lower()
-    if 'remote' in loc:
-        return False
-    last_three = loc[-3:]
-    if len(last_three) == 3 and last_three[0] == ' ' and last_three[1:].isalpha() and last_three != ' us':
         return True
-    return any(k in loc for k in NON_US)
+    loc = loc.strip().lower()
+
+    if mode == 'remote only':
+        return 'remote' in loc
+
+    if mode == 'us only':
+        if 'remote' in loc:
+            return True
+        last_three = loc[-3:]
+        if len(last_three) == 3 and last_three[0] == ' ' and last_three[1:].isalpha() and last_three != ' us':
+            return False
+        return not any(k in loc for k in _NON_US)
+
+    # "any" or anything else — no filtering
+    return True
 
 
-def passes_title_filter(job: dict) -> bool:
+def passes_title_filter(job: dict, profile: dict = None) -> bool:
+    profile  = profile or {}
+    location, seniority, target, exclude = _build_filter_lists(profile)
+
     title = (job.get('job_title') or '').lower()
-    loc   = (job.get('location_raw') or '').strip().lower()
+    loc   = (job.get('location_raw') or '').strip()
 
-    if _is_non_us(loc):
+    if not _location_ok(loc, location):
         return False
 
-    has_seniority = any(s in title for s in SENIORITY)
-    has_skip      = any(s in title for s in SKIP_FUNCTIONS)
-    has_target    = any(f in title for f in TARGET_FUNCTIONS)
+    has_seniority = any(s in title for s in seniority)
+    has_exclude   = any(s in title for s in exclude)
+    has_target    = any(f in title for f in target)
 
-    return has_seniority and not has_skip and has_target
+    return has_seniority and not has_exclude and has_target

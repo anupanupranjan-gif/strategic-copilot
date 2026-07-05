@@ -58,7 +58,7 @@ def main():
         total_fetched += len(jobs)
         print(f'  Fetched:   {len(jobs)}')
 
-        filtered = [j for j in jobs if not is_too_old(j) and passes_title_filter(j)]
+        filtered = [j for j in jobs if not is_too_old(j) and passes_title_filter(j, profile)]
         total_filtered += len(filtered)
         print(f'  Filtered:  {len(filtered)}')
 
